@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { OrganizationSwitcher, Show, SignInButton, SignUpButton, useAuth, UserButton} from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
+import { PlanButton } from "@/components/PlanButton";
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -58,10 +59,12 @@ export default function SiteHeader() {
           afterSelectOrganizationUrl="/dashboard"
           />
 
-          {isLandingPage && (
+          {isLandingPage ? (
             <Button asChild size="sm">
               <Link href="/dashboard">Dashboard</Link>
             </Button>
+          ) : ( 
+            <PlanButton />
           )}
           <UserButton/>
         </Show>
