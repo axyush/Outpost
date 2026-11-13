@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import Appshell from "@/components/Appshell";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/ui/themes";
+import { UpgradeDialogProvider } from "@/components/UpgradeDialog";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,8 +43,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <TooltipProvider>
-          <Appshell>{children}</Appshell>
-          </TooltipProvider>
+          <UpgradeDialogProvider>
+            <Appshell>{children}</Appshell>
+          </UpgradeDialogProvider>
+        </TooltipProvider>
 
         <Toaster richColors />
       </body>

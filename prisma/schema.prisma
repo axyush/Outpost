@@ -11,3 +11,80 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  workspaces   Workspace[]
+  agentPrompts AgentPrompt[]
+}
+
+enum WorkspaceStatus {
+  PLANNING
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  description String?
+  creatorId String
+  creator   User    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  clerkOrgId String?
+  status    WorkspaceStatus @default(PLANNING)
+  position   Float? @default(0)
+  shareToken  String? @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  doc      Doc?
+  canvas   Canvas?
+  agentPrompts AgentPrompt[]
+
+  @@index([creatorId])
+  @@index([clerkOrgId])
+}
+
+model Doc{
+  id          String   @id @default(cuid())
+  workspaceId String   @unique
+  content     Json?
+  yjsState    Bytes?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+
+model Canvas {
+  id          String   @id @default(cuid())
+  workspaceId String   @unique
+  // tldraw shape/store snapshot.
+  content     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model AgentPrompt {
+  id          String   @id @default(cuid())
+  // Who the prompt counts against: the workspace's Clerk org id, or the Clerk user id for a
+  // personal workspace. Clerk prefixes ids ("org_", "user_"), so the two never collide.
+  ownerId     String
+  userId      String
+  workspaceId String?
+  createdAt   DateTime @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
+  @@index([ownerId, createdAt])
+}
